@@ -6,6 +6,9 @@ import { Doctors } from "@/constants";
 import { formatDateTime } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+import * as Sentry from "@sentry/nextjs";
+import { getUser } from "@/lib/actions/patient.actions";
+
 const Success = async ({
   params: { userId },
   searchParams,
@@ -15,6 +18,10 @@ const Success = async ({
   const doctor = Doctors.find(
     (doc) => doc.name === appointment.primaryPhysician
   );
+  const user = await getUser(userId);
+
+  Sentry.metrics.set("user_view_appointment-success", user.name);
+
   return (
     <div className="flex h-screen max-h-screen px-[5%]">
       <div className="success-img">
@@ -43,32 +50,32 @@ const Success = async ({
         <section className="request-details">
           <p>Request appointment details:</p>
           <div className="flex items-center gap-3">
-            <Image 
-                src={doctor?.image!}
-                alt="doctor"
-                height={100}
-                width={100}
-                className="size-6"
+            <Image
+              src={doctor?.image!}
+              alt="doctor"
+              height={100}
+              width={100}
+              className="size-6"
             />
             <p className="whitespace-nowrap">Dr. {doctor?.name}</p>
           </div>
           <div className="flex gap-2">
             <Image
-                src="/assets/icons/calendar.svg"
-                height={24}
-                width={24}
-                alt="calendar"
+              src="/assets/icons/calendar.svg"
+              height={24}
+              width={24}
+              alt="calendar"
             />
             <p>{formatDateTime(appointment.schedule).dateTime}</p>
           </div>
         </section>
 
         <Button variant="outline" className="shad-primary-btn" asChild>
-            <Link href={`/patients/${userId}/new-appointment`}>
-                New Appointment
-            </Link>
+          <Link href={`/patients/${userId}/new-appointment`}>
+            New Appointment
+          </Link>
         </Button>
-        <p className="copyright">© 2024 CarePulse</p>
+        <p className="copyright">© 2024 Ayuskama</p>
       </div>
     </div>
   );
